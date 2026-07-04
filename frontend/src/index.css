@@ -1,0 +1,12 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.page-title {
+  font-weight: bold;
+}
+
+.leave-card:hover {
+  transform: translateY(-3px);
+  transition: 0.3s;
+}
