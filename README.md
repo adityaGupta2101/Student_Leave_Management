@@ -1,0 +1,1 @@
+Full-stack MERN Student Leave Management System with React, Node.js, Express, MongoDB, Bootstrap, and REST APIs. Features include leave application, admin dashboard, approve/reject/delete operations, and responsive UI
