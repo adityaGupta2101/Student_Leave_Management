@@ -1,4 +1,5 @@
 const Leave = require("../models/Leave");
+ 
 
 // =============================
 // Create Leave
@@ -18,6 +19,8 @@ const createLeave = async (req, res) => {
     } = req.body;
 
     const leave = await Leave.create({
+      student: req.student._id, // Logged-in Student ID
+
       studentName,
       rollNo,
       department,
@@ -44,12 +47,14 @@ const createLeave = async (req, res) => {
 };
 
 // =============================
-// Get All Leaves
+// Get All Leaves (Admin)
 // GET /api/leaves
 // =============================
 const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find();
+    const leaves = await Leave.find()
+      .populate("student", "name email rollNo")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -67,14 +72,37 @@ const getAllLeaves = async (req, res) => {
 };
 
 // =============================
+// Get Logged-in Student Leaves
+// GET /api/leaves/my-leaves
+// =============================
+const getMyLeaves = async (req, res) => {
+  try {
+    const leaves = await Leave.find({
+      student: req.student._id,
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: leaves.length,
+      leaves,
+    });
+  } catch (error) {
+    console.error("Get My Leaves Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =============================
 // Get Leave By ID
 // GET /api/leaves/:id
 // =============================
 const getLeaveById = async (req, res) => {
   try {
-    const id = req.params.id;
-
-    const leave = await Leave.findById(id);
+    const leave = await Leave.findById(req.params.id);
 
     if (!leave) {
       return res.status(404).json({
@@ -97,14 +125,14 @@ const getLeaveById = async (req, res) => {
   }
 };
 
+// ==========================
+// Approve Leave
+// PATCH /api/leaves/:id/approve
+// ==========================
 const approveLeave = async (req, res) => {
   try {
-    // Get ID from URL
-    const id = req.params.id;
-
-    // Update leave status
     const leave = await Leave.findByIdAndUpdate(
-      id,
+      req.params.id,
       {
         status: "Approved",
       },
@@ -113,7 +141,6 @@ const approveLeave = async (req, res) => {
       }
     );
 
-    // Check if leave exists
     if (!leave) {
       return res.status(404).json({
         success: false,
@@ -121,12 +148,10 @@ const approveLeave = async (req, res) => {
       });
     }
 
-    // Send response
     res.status(200).json({
       success: true,
       message: "Leave approved successfully",
       leave,
-      
     });
   } catch (error) {
     console.error("Approve Leave Error:", error);
@@ -176,21 +201,16 @@ const rejectLeave = async (req, res) => {
   }
 };
 
-
 // ==========================
 // Update Leave
 // PATCH /api/leaves/:id
 // ==========================
 const updateLeave = async (req, res) => {
   try {
-    const leave = await Leave.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const leave = await Leave.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!leave) {
       return res.status(404).json({
@@ -243,15 +263,13 @@ const deleteLeave = async (req, res) => {
   }
 };
 
-// =============================
-// Export Controllers
-// =============================
 module.exports = {
   createLeave,
   getAllLeaves,
+  getMyLeaves,
   getLeaveById,
   approveLeave,
-   rejectLeave,
+  rejectLeave,
   updateLeave,
   deleteLeave,
 };

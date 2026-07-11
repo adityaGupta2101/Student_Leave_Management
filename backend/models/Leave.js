@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const leaveSchema = new mongoose.Schema(
   {
+    // Logged-in Student Reference
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      required: true,
+    },
+
     studentName: {
       type: String,
       required: true,
@@ -60,6 +67,4 @@ const leaveSchema = new mongoose.Schema(
   }
 );
 
-const Leave = mongoose.model("Leave", leaveSchema);
-
-module.exports = Leave;
+module.exports = mongoose.model("Leave", leaveSchema);

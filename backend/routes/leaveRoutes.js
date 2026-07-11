@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   createLeave,
   getAllLeaves,
+  getMyLeaves,
   getLeaveById,
   approveLeave,
   rejectLeave,
@@ -11,25 +12,26 @@ const {
   deleteLeave,
 } = require("../controllers/leaveControllers");
 
-// Create Leave
-router.post("/", createLeave);
+const { protect } = require("../middleware/authMiddleware");
 
-// Get All Leaves
+// Student Routes
+router.post("/", protect, createLeave);
+
+// ⭐ THIS MUST COME BEFORE "/:id"
+router.get("/my-leaves", protect, getMyLeaves);
+
+// Admin Routes
 router.get("/", getAllLeaves);
 
-// Get Leave By ID
+// ⭐ THIS MUST COME AFTER "/my-leaves"
 router.get("/:id", getLeaveById);
 
-// Approve Leave
 router.patch("/:id/approve", approveLeave);
 
-// Reject Leave
 router.patch("/:id/reject", rejectLeave);
 
-// Update Leave
 router.patch("/:id", updateLeave);
 
-// Delete Leave
 router.delete("/:id", deleteLeave);
 
 module.exports = router;
