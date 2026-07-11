@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Link } from "react-router-dom";
 
 function Home() {
@@ -26,7 +27,7 @@ function Home() {
         {/* Apply Leave */}
         <div className="col-md-4">
           <Link
-            to="/apply"
+            to="/login"
             className="text-decoration-none text-dark"
           >
             <div className="card shadow h-100">
@@ -46,31 +47,28 @@ function Home() {
         </div>
 
         {/* Track Status */}
-        <div className="col-md-4">
-          <Link
-            to="/admin"
-            className="text-decoration-none text-dark"
-          >
-            <div className="card shadow h-100">
-              <div className="card-body text-center p-4">
-                <h1>📊</h1>
-
-                <h4 className="mt-3">
-                  Track Status
-                </h4>
-
-                <p className="text-muted">
-                  View whether your leave request is Pending, Approved or Rejected.
-                </p>
-              </div>
-            </div>
-          </Link>
-        </div>
+       <div className="col-md-4">
+  <Link
+    to="/login"
+    className="text-decoration-none text-dark"
+  >
+    <div className="card shadow h-100">
+      <div className="card-body text-center">
+        <h3>📊</h3>
+        <h5 className="card-title">Track Status</h5>
+        <p className="card-text">
+          View whether your leave request is Pending,
+          Approved or Rejected.
+        </p>
+      </div>
+    </div>
+  </Link>
+</div>
 
         {/* Admin Dashboard */}
         <div className="col-md-4">
           <Link
-            to="/admin"
+            to="/admin-login"
             className="text-decoration-none text-dark"
           >
             <div className="card shadow h-100">

@@ -1,24 +1,46 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+
   const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // ==========================
+  // Check Admin Login
+  // ==========================
   useEffect(() => {
-    fetchLeaves();
-  }, []);
+    const isAdmin = localStorage.getItem("isAdmin");
 
-  // Fetch all leave requests
+    if (isAdmin !== "true") {
+      alert("Access Denied! Please Login as Admin.");
+      navigate("/admin-login");
+    } else {
+      fetchLeaves();
+    }
+  }, [navigate]);
+
+  // ==========================
+  // Fetch All Leaves
+  // ==========================
   const fetchLeaves = async () => {
     try {
-      const response = await API.get("/leaves");
-      setLeaves(response.data.leaves);
+      const res = await API.get("/leaves");
+
+      setLeaves(res.data.leaves);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching leaves:", error);
+      console.log(error);
+      alert("Failed to fetch leave requests.");
+      setLoading(false);
     }
   };
 
+  // ==========================
   // Approve Leave
+  // ==========================
   const approveLeave = async (id) => {
     try {
       await API.patch(`/leaves/${id}/approve`);
@@ -27,12 +49,14 @@ function AdminDashboard() {
 
       fetchLeaves();
     } catch (error) {
-      console.error(error);
-      alert("Failed to approve leave");
+      console.log(error);
+      alert("Unable to approve leave.");
     }
   };
 
+  // ==========================
   // Reject Leave
+  // ==========================
   const rejectLeave = async (id) => {
     try {
       await API.patch(`/leaves/${id}/reject`);
@@ -41,15 +65,17 @@ function AdminDashboard() {
 
       fetchLeaves();
     } catch (error) {
-      console.error(error);
-      alert("Failed to reject leave");
+      console.log(error);
+      alert("Unable to reject leave.");
     }
   };
 
+  // ==========================
   // Delete Leave
+  // ==========================
   const deleteLeave = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this leave request?"
+      "Are you sure you want to delete this leave?"
     );
 
     if (!confirmDelete) return;
@@ -61,37 +87,42 @@ function AdminDashboard() {
 
       fetchLeaves();
     } catch (error) {
-      console.error(error);
-      alert("Failed to delete leave");
+      console.log(error);
+      alert("Unable to delete leave.");
     }
   };
 
-  // Dashboard Statistics
-  const totalLeaves = leaves.length;
+  // ==========================
+  // Logout
+  // ==========================
+  const logout = () => {
+    localStorage.removeItem("isAdmin");
+    navigate("/");
+  };
 
+  // ==========================
+  // Statistics
+  // ==========================
+  const totalLeaves = leaves.length;
   const pendingLeaves = leaves.filter(
     (leave) => leave.status === "Pending"
   ).length;
-
   const approvedLeaves = leaves.filter(
     (leave) => leave.status === "Approved"
   ).length;
-
   const rejectedLeaves = leaves.filter(
     (leave) => leave.status === "Rejected"
   ).length;
-    return (
-    <div className="container py-5">
 
-      {/* Heading */}
-      <h1 className="mb-4">Admin Dashboard</h1>
+  return (
+    <div className="container my-5">
+      <h2 className="text-primary fw-bold mb-4">Admin Dashboard</h2>
 
-      {/* Statistics Cards */}
+      {/* Statistics */}
       <div className="row mb-4">
-
         <div className="col-md-3 mb-3">
           <div className="card bg-primary text-white shadow">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5>Total Leaves</h5>
               <h2>{totalLeaves}</h2>
             </div>
@@ -100,7 +131,7 @@ function AdminDashboard() {
 
         <div className="col-md-3 mb-3">
           <div className="card bg-warning text-dark shadow">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5>Pending</h5>
               <h2>{pendingLeaves}</h2>
             </div>
@@ -109,7 +140,7 @@ function AdminDashboard() {
 
         <div className="col-md-3 mb-3">
           <div className="card bg-success text-white shadow">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5>Approved</h5>
               <h2>{approvedLeaves}</h2>
             </div>
@@ -118,115 +149,107 @@ function AdminDashboard() {
 
         <div className="col-md-3 mb-3">
           <div className="card bg-danger text-white shadow">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5>Rejected</h5>
               <h2>{rejectedLeaves}</h2>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Leave Table */}
-      <div className="table-responsive shadow">
+      <div className="card shadow">
+        <div className="card-header bg-dark text-white">
+          <h4 className="mb-0">All Leave Requests</h4>
+        </div>
 
-        <table className="table table-bordered table-hover align-middle mb-0">
-
-          <thead className="table-dark">
-            <tr>
-              <th>S.No</th>
-              <th>Student</th>
-              <th>Roll No</th>
-              <th>Department</th>
-              <th>Leave Type</th>
-              <th>From Date</th>
-              <th>To Date</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            {leaves.length === 0 ? (
-              <tr>
-                <td colSpan="9" className="text-center py-4">
-                  No Leave Requests Found
-                </td>
-              </tr>
-            ) : (
-              leaves.map((leave, index) => (
-                <tr key={leave._id}>
-
-                  <td>{index + 1}</td>
-
-                  <td>{leave.studentName}</td>
-
-                  <td>{leave.rollNo}</td>
-
-                  <td>{leave.department}</td>
-
-                  <td>{leave.leaveType}</td>
-
-                  <td>{leave.fromDate?.substring(0, 10)}</td>
-
-                  <td>{leave.toDate?.substring(0, 10)}</td>
-
-                  <td>
-                    {leave.status === "Pending" && (
-                      <span className="badge bg-warning text-dark">
-                        Pending
-                      </span>
-                    )}
-
-                    {leave.status === "Approved" && (
-                      <span className="badge bg-success">
-                        Approved
-                      </span>
-                    )}
-
-                    {leave.status === "Rejected" && (
-                      <span className="badge bg-danger">
-                        Rejected
-                      </span>
-                    )}
-                  </td>
-
-                  <td>
-
-                    <button
-                      className="btn btn-success btn-sm me-2"
-                      onClick={() => approveLeave(leave._id)}
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      className="btn btn-warning btn-sm me-2"
-                      onClick={() => rejectLeave(leave._id)}
-                    >
-                      Reject
-                    </button>
-
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => deleteLeave(leave._id)}
-                    >
-                      Delete
-                    </button>
-
-                  </td>
-
+        <div className="card-body table-responsive">
+          {loading ? (
+            <h5>Loading...</h5>
+          ) : (
+            <table className="table table-bordered table-hover align-middle">
+              <thead className="table-primary">
+                <tr>
+                  <th>Student</th>
+                  <th>Roll No</th>
+                  <th>Department</th>
+                  <th>Semester</th>
+                  <th>Leave Type</th>
+                  <th>Reason</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Status</th>
+                  <th width="240">Actions</th>
                 </tr>
-              ))
-            )}
+              </thead>
 
-          </tbody>
+              <tbody>
+                {leaves.length === 0 ? (
+                  <tr>
+                    <td colSpan="10" className="text-center">
+                      No Leave Requests Found
+                    </td>
+                  </tr>
+                ) : (
+                  leaves.map((leave) => (
+                    <tr key={leave._id}>
+                      <td>{leave.studentName}</td>
+                      <td>{leave.rollNo}</td>
+                      <td>{leave.department}</td>
+                      <td>{leave.semester}</td>
+                      <td>{leave.leaveType}</td>
+                      <td>{leave.reason}</td>
+                      <td>{leave.fromDate?.substring(0, 10)}</td>
+                      <td>{leave.toDate?.substring(0, 10)}</td>
 
-        </table>
+                      <td>
+                        <span
+                          className={`badge ${
+                            leave.status === "Approved"
+                              ? "bg-success"
+                              : leave.status === "Rejected"
+                              ? "bg-danger"
+                              : "bg-warning text-dark"
+                          }`}
+                        >
+                          {leave.status}
+                        </span>
+                      </td>
 
+                      <td>
+                        <button
+                          className="btn btn-success btn-sm me-2"
+                          onClick={() => approveLeave(leave._id)}
+                        >
+                          Approve
+                        </button>
+
+                        <button
+                          className="btn btn-warning btn-sm me-2"
+                          onClick={() => rejectLeave(leave._id)}
+                        >
+                          Reject
+                        </button>
+
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => deleteLeave(leave._id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
+      <button className="btn btn-danger mt-4" onClick={logout}>
+        Logout
+      </button>
     </div>
   );
 }

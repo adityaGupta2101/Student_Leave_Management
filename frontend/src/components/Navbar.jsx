@@ -5,12 +5,12 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow">
       <div className="container">
 
-        {/* Project Title */}
+        {/* Logo */}
         <NavLink className="navbar-brand fw-bold" to="/">
           🎓 Student Leave Management
         </NavLink>
 
-        {/* Mobile Toggle Button */}
+        {/* Mobile Toggle */}
         <button
           className="navbar-toggler"
           type="button"
@@ -22,6 +22,7 @@ function Navbar() {
 
         {/* Navigation Links */}
         <div className="collapse navbar-collapse" id="navbarNav">
+
           <ul className="navbar-nav ms-auto">
 
             <li className="nav-item">
@@ -31,18 +32,25 @@ function Navbar() {
             </li>
 
             <li className="nav-item">
-              <NavLink className="nav-link" to="/apply">
-                Apply Leave
+              <NavLink className="nav-link" to="/register">
+                Student Register
               </NavLink>
             </li>
 
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin">
-                Admin Dashboard
+              <NavLink className="nav-link" to="/login">
+                Student Login
+              </NavLink>
+            </li>
+
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/admin-login">
+                Admin Login
               </NavLink>
             </li>
 
           </ul>
+
         </div>
 
       </div>

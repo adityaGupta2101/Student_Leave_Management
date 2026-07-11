@@ -1,8 +1,10 @@
 import { useState } from "react";
 import API from "../services/api";
-
+import { useNavigate } from "react-router-dom";
 
 function ApplyLeave() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     studentName: "",
     rollNo: "",
@@ -14,7 +16,6 @@ function ApplyLeave() {
     toDate: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,121 +23,130 @@ function ApplyLeave() {
     });
   };
 
-  // Temporary submit function
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const response = await API.post("/leaves", formData);
+    const token = localStorage.getItem("token");
 
-    alert(response.data.message);
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login");
+      return;
+    }
 
-    console.log(response.data);
+    try {
+      const response = await API.post("/leaves", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    setFormData({
-      studentName: "",
-      rollNo: "",
-      department: "",
-      semester: "",
-      leaveType: "",
-      reason: "",
-      fromDate: "",
-      toDate: "",
-    });
+      alert(response.data.message);
 
-  } catch (error) {
-    console.error(error);
+      setFormData({
+        studentName: "",
+        rollNo: "",
+        department: "",
+        semester: "",
+        leaveType: "",
+        reason: "",
+        fromDate: "",
+        toDate: "",
+      });
 
-    alert("Failed to submit leave.");
-  }
-};
+      navigate("/status");
+
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to submit leave.");
+    }
+  };
 
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
+
         <div className="col-lg-8">
 
           <div className="card shadow">
 
             <div className="card-header bg-primary text-white">
-              <h3 className="mb-0">Student Leave Application</h3>
+              <h3>Student Leave Application</h3>
             </div>
 
             <div className="card-body">
 
               <form onSubmit={handleSubmit}>
 
-                {/* Student Name & Roll Number */}
                 <div className="row">
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Student Name</label>
+                    <label>Student Name</label>
 
                     <input
                       type="text"
                       className="form-control"
                       name="studentName"
-                      placeholder="Enter your name"
                       value={formData.studentName}
                       onChange={handleChange}
+                      required
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Roll Number</label>
+                    <label>Roll Number</label>
 
                     <input
                       type="text"
                       className="form-control"
                       name="rollNo"
-                      placeholder="Enter Roll Number"
                       value={formData.rollNo}
                       onChange={handleChange}
+                      required
                     />
                   </div>
 
                 </div>
 
-                {/* Department & Semester */}
                 <div className="row">
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Department</label>
+                    <label>Department</label>
 
                     <input
                       type="text"
                       className="form-control"
                       name="department"
-                      placeholder="Enter Department"
                       value={formData.department}
                       onChange={handleChange}
+                      required
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Semester</label>
+                    <label>Semester</label>
 
                     <input
                       type="number"
                       className="form-control"
                       name="semester"
-                      placeholder="Semester"
                       value={formData.semester}
                       onChange={handleChange}
+                      required
                     />
                   </div>
 
                 </div>
 
-                {/* Leave Type */}
                 <div className="mb-3">
-                  <label className="form-label">Leave Type</label>
+
+                  <label>Leave Type</label>
 
                   <select
                     className="form-select"
                     name="leaveType"
                     value={formData.leaveType}
                     onChange={handleChange}
+                    required
                   >
                     <option value="">Select Leave Type</option>
                     <option value="Medical">Medical</option>
@@ -147,26 +157,26 @@ function ApplyLeave() {
 
                 </div>
 
-                {/* Reason */}
                 <div className="mb-3">
-                  <label className="form-label">Reason</label>
+
+                  <label>Reason</label>
 
                   <textarea
                     rows="4"
                     className="form-control"
                     name="reason"
-                    placeholder="Enter Reason"
                     value={formData.reason}
                     onChange={handleChange}
-                  ></textarea>
+                    required
+                  />
 
                 </div>
 
-                {/* Dates */}
                 <div className="row">
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">From Date</label>
+
+                    <label>From Date</label>
 
                     <input
                       type="date"
@@ -174,11 +184,14 @@ function ApplyLeave() {
                       name="fromDate"
                       value={formData.fromDate}
                       onChange={handleChange}
+                      required
                     />
+
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">To Date</label>
+
+                    <label>To Date</label>
 
                     <input
                       type="date"
@@ -186,16 +199,18 @@ function ApplyLeave() {
                       name="toDate"
                       value={formData.toDate}
                       onChange={handleChange}
+                      required
                     />
+
                   </div>
 
                 </div>
 
                 <button
-                  type="submit"
                   className="btn btn-primary w-100"
+                  type="submit"
                 >
-                  Submit Leave Request
+                  Submit Leave
                 </button>
 
               </form>
@@ -205,6 +220,7 @@ function ApplyLeave() {
           </div>
 
         </div>
+
       </div>
     </div>
   );
